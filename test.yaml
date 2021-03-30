@@ -1,0 +1,22 @@
+\Booly:
+  False: ~
+  True: ~
+
+\Primitive:
+  Void: ~
+  Bool: bool
+  Int: int
+  Float: float
+  String: string
+  Array: array
+
+\App\Foo:
+  A: ~
+  B: ~
+  C: ~
+
+\App\Foo\Bar:
+  A: int
+  B: int
+  C: int
+  Parent: \App\Foo

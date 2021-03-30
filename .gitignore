@@ -1,0 +1,9 @@
+.*
+!.git*
+composer.phar
+composer.lock
+vendor/
+test.php
+test.json
+tests/generated/
+*~

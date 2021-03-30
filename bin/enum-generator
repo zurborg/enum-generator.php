@@ -1,0 +1,121 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $autoloader) {
+    if (file_exists($autoloader)) {
+        require $autoloader;
+        break;
+    }
+}
+
+use Enum\Generator;
+use Wrap\JSON;
+
+/**
+ * @param string $error
+ * @param int $exit
+ * @return never-returns
+ */
+function croak(string $error, int $exit = 1) {
+    fputs(STDERR, $error . PHP_EOL);
+    die($exit);
+}
+
+$self = array_shift($argv);
+
+$usage = "Usage: $self <class> --<name>[=<type>]\n   Or: $self <definitions-file> <target-dir>";
+
+if (count($argv) < 1) {
+    croak("Insufficient arguments.\n$usage");
+}
+
+$class = array_shift($argv);
+
+if (file_exists($class)) {
+    $file = $class;
+    $json = file_get_contents($file);
+    $definitions = JSON::decodeArray($json);
+    if (!is_array($definitions)) {
+        croak("Bad structure of `$file`: root is not an object");
+    }
+    foreach ($definitions as $class => $properties) {
+        if (is_null(Generator::checkClass($class))) {
+            croak("Invalid class in `$file`: `$class`");
+        }
+        if (!is_array($properties)) {
+            croak("Bad structure of `$file`: value of `$class` is not an object");
+        }
+        foreach ($properties as $property => $type) {
+            if (is_null(Generator::checkProp($property))) {
+                croak("Invalid property: `$property`");
+            }
+            if (is_null($type)) {
+                continue;
+            }
+            if (!is_string($type)) {
+                croak("Invalid type of `$property`: not a string");
+            }
+            if (is_null(Generator::checkType($property))) {
+                croak("Invalid type of `$property`: `$type`");
+            }
+        }
+    }
+    $target_dir = array_shift($argv);
+    if (!is_dir($target_dir)) {
+        mkdir($target_dir);
+    }
+    foreach ($definitions as $class => $properties) {
+        $enum = new Generator($class, $properties);
+        $enum->saveIntoFile($target_dir);
+    }
+
+    exit;
+}
+
+if (is_null(Generator::checkClass($class))) {
+    croak("Invalid class: `$class`");
+}
+
+$options = [];
+
+foreach ($argv as $arg) {
+    if (preg_match('/^--([^=]+)=(.+)$/', $arg, $match)) {
+        [$arg, $name, $type] = $match;
+        if (is_null(Generator::checkProp($name))) {
+            croak("Invalid property: `$name`");
+        }
+        if (is_null(Generator::checkType($type))) {
+            croak("Invalid type of `$name`: `$type`");
+        }
+        $options[$name] = $type;
+        continue;
+    }
+    if (preg_match('/^--(.+)$/', $arg, $match)) {
+        [$arg, $name] = $match;
+        if (is_null(Generator::checkProp($name))) {
+            croak("Invalid property: `$name`");
+        }
+        $options[$name] = null;
+        continue;
+    }
+    croak("Bad arguments.\n$usage");
+}
+
+if (count($options) < 2) {
+    croak("At least 2 options are required\n");
+}
+
+try {
+    $lines = Generator::build($class, $options);
+} catch (Throwable $e) {
+    croak("$e");
+}
+
+echo '<?php' . PHP_EOL . PHP_EOL;
+echo 'declare(strict_types=1);' . PHP_EOL . PHP_EOL;
+
+foreach ($lines as $line) {
+    echo $line . PHP_EOL;
+}
