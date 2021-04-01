@@ -64,7 +64,7 @@ if (file_exists($class)) {
     }
     $target_dir = array_shift($argv);
     if (!is_dir($target_dir)) {
-        mkdir($target_dir);
+        mkdir($target_dir, 0777, true);
     }
     foreach ($definitions as $class => $properties) {
         $enum = new Generator($class, $properties);

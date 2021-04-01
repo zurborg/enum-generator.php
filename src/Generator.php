@@ -92,7 +92,7 @@ class Generator
         }
         $path = $rootpath . $this->getBasepath();
         if (!is_dir($path)) {
-            mkdir($path);
+            mkdir($path, 0777, true);
         }
         $file = $rootpath . $this->getFilename($extension);
         try {
