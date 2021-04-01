@@ -3,7 +3,15 @@
 
 declare(strict_types=1);
 
-foreach ([__DIR__ . '/../../autoload.php', __DIR__ . '/../vendor/autoload.php', __DIR__ . '/vendor/autoload.php'] as $autoloader) {
+foreach ([
+    '/../../..',
+    '/../..',
+    '/',
+    '/../../vendor',
+    '/../vendor',
+    '/vendor',
+] as $path) {
+    $autoloader = __DIR__ . $path . '/autoload.php';
     if (file_exists($autoloader)) {
         require $autoloader;
         break;
