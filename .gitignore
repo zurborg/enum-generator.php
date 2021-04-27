@@ -6,4 +6,7 @@ vendor/
 test.php
 test.json
 tests/generated/
+coverage.txt
+coverage/
+tmp/
 *~

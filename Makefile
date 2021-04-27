@@ -18,11 +18,21 @@ vendor: composer.json
 	$(yaml2json) < $? > $@
 
 tests/generated: test.json
+	rm -rf $@
 	$(php) bin/enum-generator test.json $@
 
 test: lint tests/generated
 	$(phpcs) --warning-severity=0 --standard=PSR2 src
-	$(phpunit) --verbose tests/
+	@echo "(No code coverage report available)" > coverage.txt
+	rm -rf coverage/ tmp/
+	$(phpunit) \
+		--coverage-filter=src/ \
+		--path-coverage \
+		--coverage-text=coverage.txt \
+		--coverage-html=coverage \
+		--verbose \
+		tests/
+	@cat coverage.txt
 
 lint:
 	for file in `find src tests -name '*.php' | sort`; do $(php) -l $$file || exit 1; done
