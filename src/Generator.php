@@ -143,7 +143,9 @@ class Generator
     public function iterLines(): \Generator
     {
         $state_prop = "state";
+        $mutable_prop = "mutable";
         $this_state_prop = "\$this->{$state_prop}";
+        $this_mutable_prop = "\$this->{$mutable_prop}";
 
         if ($this->hasNamespace()) {
             yield "namespace {$this->getNamespace()};";
@@ -164,16 +166,17 @@ class Generator
         foreach ($this->iterOptions(true) as $option) {
             yield "\tprivate ?{$option['prop_type']};";
         }
+        yield "\tprivate bool \${$mutable_prop};";
 
         yield self::BLANK;
 
         yield "\tprivate function __construct()";
         yield "\t{";
         yield "\t\t{$this_state_prop} = '';";
-
         foreach ($this->iterOptions(true) as $option) {
             yield "\t\t\$this->{$option['prop_name']} = null;";
         }
+        yield "\t\t{$this_mutable_prop} = true;";
         yield "\t}";
 
         yield self::BLANK;
@@ -181,6 +184,26 @@ class Generator
         yield "\tpublic function __toString(): string";
         yield "\t{";
         yield "\t\treturn {$this_state_prop};";
+        yield "\t}";
+        yield self::BLANK;
+
+        yield "\tpublic function __clone()";
+        yield "\t{";
+        yield "\t\t{$this_mutable_prop} = true;";
+        yield "\t}";
+
+        yield self::BLANK;
+
+        yield "\tpublic function freeze()";
+        yield "\t{";
+        yield "\t\t{$this_mutable_prop} = false;";
+        yield "\t}";
+
+        yield self::BLANK;
+
+        yield "\tpublic function canMutate(): bool";
+        yield "\t{";
+        yield "\t\treturn {$this_mutable_prop};";
         yield "\t}";
 
         yield self::BLANK;
@@ -244,15 +267,19 @@ class Generator
 
             yield self::BLANK;
             yield "\t/**";
-            yield "\t * Set state to <em>{$option['name']}</em>";
             yield "\t *";
             if ($option['typed']) {
                 yield "\t * @param {$option['arg']} Inner value";
             }
+            yield "\t * Set state to <em>{$option['name']}</em>";
             yield "\t * @return void";
             yield "\t */";
             yield "\tpublic function set{$option['name']}({$option['arg']}): void";
             yield "\t{";
+            yield "\t\tif (!{$this_mutable_prop}) {";
+            yield "\t\t\tthrow new \RuntimeException(\"Enum is immutable\");";
+            yield "\t\t}";
+
             foreach ($this->iterOptions(true) as $suboption) {
                 yield "\t\t\$this->{$suboption['prop_name']} = null;";
             }

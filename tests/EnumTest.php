@@ -414,4 +414,16 @@ class EnumTest extends TestCase
         $bar->getParent()->setC();
         $this->assertEquals(\App\Foo::C, $foo);
     }
+
+    public function testMutate()
+    {
+        $foo = \App\Foo::A();
+        $this->assertTrue($foo->canMutate());
+        $foo->freeze();
+        $this->assertFalse($foo->canMutate());
+        $bar = clone $foo;
+        $this->assertSame("$foo", "$bar");
+        $this->assertFalse($foo->canMutate());
+        $this->assertTrue($bar->canMutate());
+    }
 }
