@@ -21,7 +21,7 @@ tests/generated: test.json
 	rm -rf $@
 	$(php) bin/enum-generator test.json $@
 
-test: lint tests/generated
+test: | tests/generated lint
 	$(phpcs) --warning-severity=0 --standard=PSR2 src
 	@echo "(No code coverage report available)" > coverage.txt
 	rm -rf coverage/ tmp/
