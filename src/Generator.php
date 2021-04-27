@@ -183,6 +183,22 @@ class Generator
         yield "\t\treturn {$this_state_prop};";
         yield "\t}";
 
+        yield self::BLANK;
+
+        yield "\tpublic function eq(self \$other): bool";
+        yield "\t{";
+        foreach ($this->iterOptions() as $option) {
+            yield "\t\tif ({$this_state_prop} === self::{$option['name']}) {";
+            if ($option['typed']) {
+                yield "\t\t\treturn \$other->is{$option['name']}() and \$other->get{$option['name']}() === \$this->{$option['prop_name']};";
+            } else {
+                yield "\t\t\treturn \$other->is{$option['name']}();";
+            }
+            yield "\t\t}";
+        }
+        yield "\t\treturn false;";
+        yield "\t}";
+
         foreach ($this->iterOptions() as $option) {
             yield self::BLANK;
 

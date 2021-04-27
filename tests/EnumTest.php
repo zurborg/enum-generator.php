@@ -368,6 +368,42 @@ class EnumTest extends TestCase
         $this->assertNotEquals($A, $B);
     }
 
+    public function testEq()
+    {
+        $A1 = \App\Foo::A();
+        $A2 = \App\Foo::A();
+
+        $this->assertTrue($A1->eq($A1));
+        $this->assertTrue($A2->eq($A2));
+
+        $this->assertTrue($A1->eq($A2));
+        $this->assertTrue($A2->eq($A1));
+
+        $B = \App\Foo::B();
+        $this->assertFalse($A1->eq($B));
+        $this->assertFalse($B->eq($A1));
+
+        $void = Primitive::Void();
+        $str1 = Primitive::String('foo');
+        $str2 = Primitive::String('bar');
+        $str3 = Primitive::String('foo');
+
+        $this->assertFalse($void->eq($str1));
+        $this->assertFalse($void->eq($str2));
+        $this->assertFalse($void->eq($str3));
+
+        $this->assertFalse($str1->eq($str2));
+        $this->assertFalse($str2->eq($str3));
+
+        $this->assertTrue($str1->eq($str1));
+        $this->assertTrue($str3->eq($str3));
+
+        $this->assertNotSame($str1, $str3);
+
+        $this->assertTrue($str3->eq($str1));
+        $this->assertTrue($str1->eq($str3));
+    }
+
     public function testChain()
     {
         $foo = \App\Foo::A();
