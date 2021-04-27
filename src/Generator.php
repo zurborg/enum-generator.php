@@ -85,7 +85,7 @@ class Generator
         return $this->getBasepath() . DIRECTORY_SEPARATOR . $this->class . '.' . $extension;
     }
 
-    public function saveIntoFile(string $rootpath, string $extension = 'php')
+    public function saveIntoFile(string $rootpath, string $extension = 'php'): string
     {
         if (substr($rootpath, -1) !== DIRECTORY_SEPARATOR) {
             $rootpath .= DIRECTORY_SEPARATOR;
@@ -97,9 +97,6 @@ class Generator
         $file = $rootpath . $this->getFilename($extension);
         try {
             $fh = fopen($file, 'w');
-            if ($fh === false or !is_resource($fh)) {
-                throw new InvalidArgumentException("Cannot open file `$file` for writing");
-            }
             fputs($fh, '<?php' . PHP_EOL . PHP_EOL . 'declare(strict_types=1);' . PHP_EOL . PHP_EOL);
             foreach ($this->iterLines() as $line) {
                 fputs($fh, $line . PHP_EOL);
@@ -109,6 +106,7 @@ class Generator
                 fclose($fh);
             }
         }
+        return $file;
     }
 
     public function iterOptions(bool $typed_only = false): \Generator
