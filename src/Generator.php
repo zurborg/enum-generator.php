@@ -187,6 +187,9 @@ class Generator
         yield "\t}";
         yield self::BLANK;
 
+        yield "\t/**";
+        yield "\t * Object cloining resets the immutable state. After cloning, any changes are no longer prohibited.";
+        yield "\t */";
         yield "\tpublic function __clone()";
         yield "\t{";
         yield "\t\t{$this_mutable_prop} = true;";
@@ -194,6 +197,13 @@ class Generator
 
         yield self::BLANK;
 
+        yield "\t/**";
+        yield "\t * Make <em>{$this->class}</em> immutable";
+        yield "\t *";
+        yield "\t * After that operation any changes are prohibited. Subsequent calls to set* will throw an exception.";
+        yield "\t *";
+        yield "\t * @return self";
+        yield "\t */";
         yield "\tpublic function freeze(): self";
         yield "\t{";
         yield "\t\t{$this_mutable_prop} = false;";
@@ -202,6 +212,11 @@ class Generator
 
         yield self::BLANK;
 
+        yield "\t/**";
+        yield "\t * Returns true when <em>{$this->class}</em> is mutable";
+        yield "\t *";
+        yield "\t * @return bool";
+        yield "\t */";
         yield "\tpublic function canMutate(): bool";
         yield "\t{";
         yield "\t\treturn {$this_mutable_prop};";
@@ -209,6 +224,14 @@ class Generator
 
         yield self::BLANK;
 
+        yield "\t/**";
+        yield "\t * Compare instances by state and inner value";
+        yield "\t *";
+        yield "\t * Two instances of <em>{$this->class}</em> are equal, when their state and (if any) inner value are the same.";
+        yield "\t *";
+        yield "\t * @param self \$other";
+        yield "\t * @return bool";
+        yield "\t */";
         yield "\tpublic function eq(self \$other): bool";
         yield "\t{";
         foreach ($this->iterOptions() as $option) {
@@ -267,11 +290,11 @@ class Generator
 
             yield self::BLANK;
             yield "\t/**";
+            yield "\t * Set state to <em>{$option['name']}</em>";
             yield "\t *";
             if ($option['typed']) {
                 yield "\t * @param {$option['arg']} Inner value";
             }
-            yield "\t * Set state to <em>{$option['name']}</em>";
             yield "\t * @return self";
             yield "\t */";
             yield "\tpublic function set{$option['name']}({$option['arg']}): self";
