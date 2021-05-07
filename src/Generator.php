@@ -194,9 +194,10 @@ class Generator
 
         yield self::BLANK;
 
-        yield "\tpublic function freeze()";
+        yield "\tpublic function freeze(): self";
         yield "\t{";
         yield "\t\t{$this_mutable_prop} = false;";
+        yield "\t\treturn \$this;";
         yield "\t}";
 
         yield self::BLANK;
@@ -236,8 +237,7 @@ class Generator
             yield "\tpublic static function {$option['name']}({$option['arg']}): self";
             yield "\t{";
             yield "\t\t\$self = new self();";
-            yield "\t\t\$self->set{$option['name']}({$option['var']});";
-            yield "\t\treturn \$self;";
+            yield "\t\treturn \$self->set{$option['name']}({$option['var']});";
             yield "\t}";
 
             yield self::BLANK;
@@ -272,9 +272,9 @@ class Generator
                 yield "\t * @param {$option['arg']} Inner value";
             }
             yield "\t * Set state to <em>{$option['name']}</em>";
-            yield "\t * @return void";
+            yield "\t * @return self";
             yield "\t */";
-            yield "\tpublic function set{$option['name']}({$option['arg']}): void";
+            yield "\tpublic function set{$option['name']}({$option['arg']}): self";
             yield "\t{";
             yield "\t\tif (!{$this_mutable_prop}) {";
             yield "\t\t\tthrow new \RuntimeException(\"Enum is immutable\");";
@@ -287,6 +287,7 @@ class Generator
             if ($option['typed']) {
                 yield "\t\t{$option['this_prop_name']} = {$option['var']};";
             }
+            yield "\t\treturn \$this;";
             yield "\t}";
 
             yield self::BLANK;
